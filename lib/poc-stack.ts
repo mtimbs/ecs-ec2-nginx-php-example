@@ -1,16 +1,33 @@
-import * as cdk from 'aws-cdk-lib';
-import { Construct } from 'constructs';
+import {Construct} from 'constructs';
+import {Stack, StackProps} from 'aws-cdk-lib';
+import {Cluster} from 'aws-cdk-lib/aws-ecs';
+import {VpcConstruct} from "./constructs/vpc";
+import {Stage} from "../bin/poc";
+
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
-export class PocStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+interface Props extends StackProps {
+  stage: Stage;
+  appName: string;
+}
+
+export class PocStack extends Stack {
+  constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    const {appName, stage} = props;
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'PocQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    /**
+     * Sometimes it is useful to extract things into a construct.
+     * Whether a VPC is one of them depends on your needs. Here it is done for illustration
+     */
+    const Vpc = new VpcConstruct(this, '', props);
+
+    // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.Cluster.html
+    const cluster = new Cluster(this, `${appName}${stage}Cluster`, {
+      vpc: Vpc.vpc
+    })
+
+
   }
 }

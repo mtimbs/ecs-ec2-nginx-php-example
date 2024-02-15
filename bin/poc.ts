@@ -1,21 +1,37 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
-import { PocStack } from '../lib/poc-stack';
+import {App} from 'aws-cdk-lib';
+import {PocStack} from '../lib/poc-stack';
 
-const app = new cdk.App();
-new PocStack(app, 'PocStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+const {
+  CDK_DEPLOY_ACCOUNT,
+  CDK_DEFAULT_ACCOUNT,
+  CDK_DEPLOY_REGION,
+  CDK_DEFAULT_REGION,
+  APP_NAME = 'NginxFPMConceptApp',
+  STAGE = "__UNSET__"
+} = process.env;
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+// TODO: Replace with some form of schema validation maybe (e.g. Zod)
+export type Stage = 'prod' | 'staging' | 'demo';
+export const VALID_STAGES = ['prod', 'staging', 'demo'];
+if (!VALID_STAGES.includes(STAGE)) {
+  throw Error(`STAGE ${STAGE} is not a valid STAGE. Valid stages are: ${VALID_STAGES.reduce((c, s) => `${c},${s}`, '').substring(1)}`);
+}
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
-});
+/**
+ * Anything we want to pass into each stack can go here
+ */
+const props = {
+  env: {
+    account: CDK_DEPLOY_ACCOUNT || CDK_DEFAULT_ACCOUNT,
+    region: CDK_DEPLOY_REGION || CDK_DEFAULT_REGION,
+  },
+  stage: STAGE as Stage,
+  appName: APP_NAME,
+};
+
+const app = new App();
+
+new PocStack(app, props.appName, props);
