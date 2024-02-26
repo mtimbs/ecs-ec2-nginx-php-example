@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  web:
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    container_name: nginx-container
+    ports:
+      - "80:80"
+    volumes:
+      - ./src/:/app/
+    links:
+      - php-fpm
+  php-fpm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./src/:/app/
