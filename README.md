@@ -1,6 +1,18 @@
 # README
 This is a sample application that spins up the infrastructure required in order to set up a simple PHP application running with nginx + php-fpm on an ECS service. It is configured so that nginx and php run in separate containers inside the same task definition. Nginx handles external traffic and then proxies it to php.
 
+## Navigating the Code
+The `service-1` directory is a blank Yii2 application with: 
+- docker-compose for running locally
+- nginx config for setting up the nginx proxy to php-fpm across containers
+- Dockerfile for building the prod images
+- a `build-images.sh` script which will let you easily build and push images to ECR (arm and amd)
+
+All the CDK code is inside the `infrastructure` directory. The key parts are:
+- `bin/app.ts` - the main entrypoint for the CDK app. Not much happening other than configuring the environment
+- `lib/globalStack.ts` - imports a bunch of custom constructs to create the resources needed to deploy this (ECR repository, VPC, ECS Cluster, ECS Service) and creates the required resources
+- `lib/constructs`- each of the main logical infrastructure components have been wrapped in their own custom construct to help make clearer the different pieces of infra and to avoid one giant lib file. This level of abstraction is not necessary but has been chosen to make things clearer for the reader and provide a gentle introduction to the concept of CDK Constructs.
+
 ## Deployment
 This is a standard CDK app. To deploy it you can run `npx cdk deploy` from inside the infrastructure directory. It assumes you have AWS credentials in your environment. The app also relies on a number of other environment variables.
 
